@@ -66,7 +66,7 @@ jobs:
   # This job will run after the Python unit tests
   # and is scaffolded to facilitate sending notifications based
   # on the test results.
-  notifications:
+   notifications:
     needs: python-unit-tests # wait for the python-unit-tests job to finish first
     if: ${{ always() }} # still run this job even if the earlier job failed
     runs-on: ubuntu-latest # use GitHub's Ubuntu runner
@@ -74,21 +74,16 @@ jobs:
       issues: write # allow this job to create a GitHub issue as the notification
     steps:
       - name: Notify on test results # label shown in the Actions screen
-        run: | # start a multi-line shell script
+        run: |
           if [ "${{ needs.python-unit-tests.result }}" == "success" ]; then # if the test job passed
             echo "success notifications go here" # write a success message into the workflow log
           else # otherwise, the test job failed
             echo "failure notifications go here" # write a failure message into the workflow log
-            curl -L \ # call the GitHub API
-              -X POST \ # send a POST request to create something
-              -H "Accept: application/vnd.github+json" \ # tell GitHub we want to use its JSON API
-              -H "Authorization: Bearer ${{ github.token }}" \ # use the built-in GitHub token for permission
-              https://api.github.com/repos/${{ github.repository }}/issues \ # send the request to this repo's issues area
-              -d "{\"title\":\"Python Unit Tests failed\",\"body\":\"The Python Unit Tests workflow failed. Please check the Actions tab.\"}" # create an issue with a simple title and body
+            # Bash on next line calls the GitHub API to create an issue in this repo when tests fail
+            curl -L \
+              -X POST \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${{ github.token }}" \
+              https://api.github.com/repos/${{ github.repository }}/issues \
+              -d "{\"title\":\"Python Unit Tests failed\",\"body\":\"The Python Unit Tests workflow failed. Please check the Actions tab.\"}"
           fi # end the if statement
-
-    
-
-          
-
-  
