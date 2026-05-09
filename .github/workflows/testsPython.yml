@@ -63,17 +63,32 @@ jobs:
           codecov-token: "${{ secrets.CODECOV_TOKEN }}"
 
   # Job #2: Notifications (Mini-capstone assignment)
-  # This job will run after the Python unit tests and
-  # is scaffolded to facilitate sending notifications based
+  # This job will run after the Python unit tests
+  # and is scaffolded to facilitate sending notifications based
   # on the test results.
   notifications:
-    needs: python-unit-tests
-    runs-on: ubuntu-latest
+    needs: python-unit-tests # wait for the python-unit-tests job to finish first
+    if: ${{ always() }} # still run this job even if the earlier job failed
+    runs-on: ubuntu-latest # use GitHub's Ubuntu runner
+    permissions:
+      issues: write # allow this job to create a GitHub issue as the notification
     steps:
-      - name: Notify on test results
-        run: |
-          if [ "${{ needs.python-unit-tests.result }}" == "success" ]; then
-            echo "success notifications go here"
-          else
-            echo "failure notifications go here"
-          fi
+      - name: Notify on test results # label shown in the Actions screen
+        run: | # start a multi-line shell script
+          if [ "${{ needs.python-unit-tests.result }}" == "success" ]; then # if the test job passed
+            echo "success notifications go here" # write a success message into the workflow log
+          else # otherwise, the test job failed
+            echo "failure notifications go here" # write a failure message into the workflow log
+            curl -L \ # call the GitHub API
+              -X POST \ # send a POST request to create something
+              -H "Accept: application/vnd.github+json" \ # tell GitHub we want to use its JSON API
+              -H "Authorization: Bearer ${{ github.token }}" \ # use the built-in GitHub token for permission
+              https://api.github.com/repos/${{ github.repository }}/issues \ # send the request to this repo's issues area
+              -d "{\"title\":\"Python Unit Tests failed\",\"body\":\"The Python Unit Tests workflow failed. Please check the Actions tab.\"}" # create an issue with a simple title and body
+          fi # end the if statement
+
+    
+
+          
+
+  
