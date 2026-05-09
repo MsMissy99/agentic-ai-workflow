@@ -85,4 +85,5 @@ jobs:
               -H "Accept: application/vnd.github+json" \
               -H "Authorization: Bearer ${{ github.token }}" \
               https://api.github.com/repos/${{ github.repository }}/issues \
-              -d '{\"title\":\"Python Unit Tests failed\",\"body\":\"The Python Unit Tests workflow failed. Please check the Actions tab.\"}'        fi # end the if statement
+              -d '{"title":"Python Unit Tests failed","body":"The Python Unit Tests workflow failed. Please check the Actions tab."}'       
+          fi # end the if statement
